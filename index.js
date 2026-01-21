@@ -1,26 +1,33 @@
 
 
-
 // const express = require('express');
 // const mongoose = require('mongoose');
 // const cors = require('cors');
 // require('dotenv').config();
 
 // const app = express();
+// const port = process.env.PORT || 5000; // ✅ Port Defined Here
 
 // // Middleware
 // app.use(express.json());
-// app.use(cors());
+
+// // CORS Setup (For Vercel & Localhost)
+// app.use(cors({
+//   origin: [
+//     "http://localhost:5173", 
+//     "https://ebaub-frontend.vercel.app", // আপনার ফ্রন্টএন্ড লাইভ লিংক (পরিবর্তন করতে পারেন)
+//   ],
+//   credentials: true
+// }));
 
 // // --- 1. MongoDB Connection ---
-// const uri = "mongodb+srv://ebaub-fun-hub:E0Mp1Xiy7zIgSv8u@cluster0.9xkcuxc.mongodb.net/ebaub-db?retryWrites=true&w=majority&appName=Cluster0";
+// const uri = process.env.MONGO_URI;
 
 // mongoose.connect(uri)
 //   .then(() => console.log("✅ MongoDB Connected Successfully!"))
 //   .catch(err => console.error("❌ MongoDB Connection Error:", err));
 
 // // --- 2. Schema Models ---
-
 // // User Schema
 // const UserSchema = new mongoose.Schema({
 //   name: { type: String, required: true },
@@ -30,7 +37,7 @@
 //   batch: { type: String, required: true },
 //   photoURL: { type: String },
 //   uid: { type: String, required: true },
-//   role: { type: String, default: 'user' }, // user, admin, moderator
+//   role: { type: String, default: 'user' }, 
 //   suspensionEndsAt: { type: Date, default: null },
 //   createdAt: { type: Date, default: Date.now }
 // });
@@ -41,13 +48,10 @@
 //   content: { type: String, required: true },
 //   image: { type: String },
 //   category: { type: String, required: true },
-
-//   // Reactions (Facebook Style)
 //   reactions: [{
 //     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-//     type: { type: String, required: true } // 'like', 'love', 'haha', 'sad', 'angry'
+//     type: { type: String, required: true } 
 //   }],
-
 //   comments: [{
 //     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 //     text: String,
@@ -59,6 +63,11 @@
 // const Post = mongoose.model('Post', PostSchema);
 
 // // --- 3. API Routes ---
+
+// // ✅ Default Route (To Check Server Status)
+// app.get('/', (req, res) => {
+//   res.send('EBAUB Fun Hub Server is Running 🚀');
+// });
 
 // // A. Register User
 // app.post('/api/register', async (req, res) => {
@@ -125,8 +134,6 @@
 //   }
 // });
 
-// // --- ADMIN & MODERATOR ROUTES ---
-
 // // F. Get All Users (Admin)
 // app.get('/api/users', async (req, res) => {
 //   try {
@@ -176,9 +183,7 @@
 //   }
 // });
 
-// // --- POST INTERACTION ROUTES ---
-
-// // J. Handle Reactions (Like, Love, Haha...)
+// // J. Handle Reactions
 // app.put('/api/posts/:id/react', async (req, res) => {
 //   try {
 //     const post = await Post.findById(req.params.id);
@@ -188,14 +193,11 @@
 
 //     if (existingReactionIndex !== -1) {
 //       if (post.reactions[existingReactionIndex].type === type) {
-//         // Toggle Off (Remove reaction)
 //         post.reactions.splice(existingReactionIndex, 1);
 //       } else {
-//         // Update reaction type
 //         post.reactions[existingReactionIndex].type = type;
 //       }
 //     } else {
-//       // Add new reaction
 //       post.reactions.push({ user: userId, type });
 //     }
 
@@ -222,7 +224,7 @@
 //   }
 // });
 
-// // L. Delete Comment (User/Admin/Moderator)
+// // L. Delete Comment
 // app.delete('/api/posts/:postId/comments/:commentId', async (req, res) => {
 //   try {
 //     const { postId, commentId } = req.params;
@@ -236,7 +238,6 @@
 //     const comment = post.comments.id(commentId);
 //     if (!comment) return res.status(404).json({ message: "Comment not found" });
 
-//     // Permission Check: Owner OR Admin OR Moderator
 //     if (
 //       comment.user.toString() === userId ||
 //       requestingUser.role === 'admin' ||
@@ -257,8 +258,7 @@
 //   }
 // });
 
-
-// // 🔥 L-2. Edit Comment (NEW)
+// // L-2. Edit Comment
 // app.put('/api/posts/:postId/comments/:commentId', async (req, res) => {
 //   try {
 //     const { postId, commentId } = req.params;
@@ -270,15 +270,13 @@
 //     const comment = post.comments.id(commentId);
 //     if (!comment) return res.status(404).json({ message: "Comment not found" });
 
-//     // চেক করা হচ্ছে যে ইউজার তার নিজের কমেন্ট এডিট করছে কিনা
 //     if (comment.user.toString() !== userId) {
 //       return res.status(403).json({ message: "Unauthorized" });
 //     }
 
-//     comment.text = text; // টেক্সট আপডেট
+//     comment.text = text;
 //     await post.save();
 
-//     // আপডেটেড ডাটা পপুলেট করে পাঠানো
 //     const updatedPost = await Post.findById(postId)
 //       .populate('user', 'name photoURL varsityId email')
 //       .populate('comments.user', 'name photoURL');
@@ -288,7 +286,6 @@
 //     res.status(500).json({ error: err.message });
 //   }
 // });
-
 
 // // M. Edit Post Content
 // app.put('/api/posts/:id', async (req, res) => {
@@ -313,18 +310,18 @@
 //   }
 // });
 
-// // --- Server Start ---
-// // const port = 5000;
-// // app.listen(port, () => {
-// //   console.log(`🚀 Server is running on port: ${port}`);
-// // });
+// // --- Server Start (For Vercel & Localhost) ---
 
-// // লোকালহোস্টের জন্য (এটাও থাকবে)
+// // ✅ Export App for Vercel
+// module.exports = app;
+
+// // ✅ Start Server locally if not in production (Vercel handles production start automatically)
 // if (process.env.NODE_ENV !== 'production') {
 //   app.listen(port, () => {
-//     console.log(`Server running on port ${port}`);
+//     console.log(`🚀 Server is running on port: ${port}`);
 //   });
 // }
+
 
 
 const express = require('express');
@@ -510,7 +507,7 @@ app.delete('/api/users/:id', async (req, res) => {
   }
 });
 
-// J. Handle Reactions
+// J. Handle Reactions (✅ FIXED: Added Populate)
 app.put('/api/posts/:id/react', async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -529,7 +526,13 @@ app.put('/api/posts/:id/react', async (req, res) => {
     }
 
     await post.save();
-    res.json(post);
+    
+    // 🔥 FIX: ডাটা সেভ করার পর ইউজারের তথ্যসহ পোস্টটি আবার আনা হচ্ছে
+    const updatedPost = await Post.findById(req.params.id)
+      .populate('user', 'name photoURL varsityId email')
+      .populate('comments.user', 'name photoURL');
+
+    res.json(updatedPost);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
