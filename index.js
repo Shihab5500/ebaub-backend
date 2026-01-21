@@ -342,8 +342,7 @@ app.use(express.json());
 app.use(cors({
   origin: [
     "http://localhost:5173", 
-    "https://ebaub-fun-hub.vercel.app", // আপনার ফ্রন্টএন্ড লাইভ লিংক (পরিবর্তন করতে পারেন)
-    "https://ebaub-client.vercel.app"
+    "https://ebaub-frontend.vercel.app", // আপনার ফ্রন্টএন্ড লাইভ লিংক (পরিবর্তন করতে পারেন)
   ],
   credentials: true
 }));
