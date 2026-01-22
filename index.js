@@ -668,7 +668,7 @@ app.use(express.json());
 app.use(cors({
   origin: [
     "http://localhost:5173", 
-    "https://ebaub-frontend.vercel.app", 
+    "https://ebaub-fun-hub.vercel.app", 
   ],
   credentials: true
 }));
