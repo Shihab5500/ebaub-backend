@@ -152,14 +152,35 @@ exports.deleteComment = async (req, res) => { /* ... existing code ... */
         res.status(500).json({ error: err.message });
       }
 };
-exports.updatePostContent = async (req, res) => { /* ... existing code ... */ 
-    try {
-        const { content } = req.body;
-        const updatedPost = await Post.findByIdAndUpdate(req.params.id, { content }, { new: true })
-          .populate('user', 'name photoURL')
-          .populate('comments.user', 'name photoURL');
-        res.json(updatedPost);
-      } catch (err) {
-        res.status(500).json({ error: err.message });
-      }
+// 🔥 Update Comment Function
+exports.updateComment = async (req, res) => {
+  try {
+    const { postId, commentId } = req.params;
+    const { userId, text } = req.body;
+
+    const post = await Post.findById(postId);
+    if (!post) return res.status(404).json({ message: "Post not found" });
+
+    const comment = post.comments.id(commentId);
+    if (!comment) return res.status(404).json({ message: "Comment not found" });
+
+    // চেক করা হচ্ছে যে ইউজার তার নিজের কমেন্ট এডিট করছে কিনা
+    if (comment.user.toString() !== userId) {
+      return res.status(403).json({ message: "Unauthorized: You can only edit your own comment" });
+    }
+
+    // কমেন্ট আপডেট
+    comment.text = text;
+    await post.save();
+
+    // আপডেটেড পোস্ট রিটার্ন করা (যাতে ফ্রন্টএন্ডে সাথে সাথে দেখায়)
+    const updatedPost = await Post.findById(postId)
+      .populate('user', 'name photoURL')
+      .populate('comments.user', 'name photoURL');
+
+    res.json(updatedPost);
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };

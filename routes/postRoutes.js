@@ -31,7 +31,7 @@ router.put('/:id/status', postController.updatePostStatus);
 router.put('/:id', postController.updatePostContent);
 router.delete('/:id', postController.deletePost);
 router.put('/:id/react', postController.reactPost);
-router.post('/:id/comment', postController.addComment);
+router.put('/:postId/comments/:commentId', postController.updateComment);
 router.delete('/:postId/comments/:commentId', postController.deleteComment);
 
 module.exports = router;
