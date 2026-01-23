@@ -330,6 +330,51 @@
 // }
 
 
+// const express = require('express');
+// const mongoose = require('mongoose');
+// const cors = require('cors');
+// require('dotenv').config();
+
+// const app = express();
+// const port = process.env.PORT || 5000;
+
+// // Middleware
+// app.use(express.json());
+// app.use(cors({
+//   origin: ["http://localhost:5173", "http://localhost:5174"], // Frontend URL
+//   credentials: true
+// }));
+
+// // MongoDB Connection
+// mongoose.connect(process.env.MONGO_URI)
+//   .then(() => console.log("✅ MongoDB Connected Successfully!"))
+//   .catch(err => console.error("❌ MongoDB Connection Error:", err));
+
+// // Routes Import
+// const userRoutes = require('./routes/userRoutes');
+// const postRoutes = require('./routes/postRoutes');
+
+// // 🔥 Route Mounting (খুবই গুরুত্বপূর্ণ)
+// // 1. User & Auth Routes
+// app.use('/api', userRoutes); 
+// // এর ফলে:
+// // - /api/register কাজ করবে
+// // - /api/users কাজ করবে (কারণ userRoutes ফাইলে আমরা /users যুক্ত করেছি)
+
+// // 2. Post Routes
+// app.use('/api/posts', postRoutes);
+// // এর ফলে:
+// // - /api/posts কাজ করবে
+
+// // Root Route
+// app.get('/', (req, res) => {
+//   res.send('EBAUB Fun Hub Local Server Running 🚀');
+// });
+
+// app.listen(port, () => {
+//   console.log(`🚀 Server is running on port: ${port}`);
+// });
+
 
 const express = require('express');
 const mongoose = require('mongoose');
@@ -342,10 +387,7 @@ const port = process.env.PORT || 5000;
 // Middleware
 app.use(express.json());
 app.use(cors({
-  origin: [
-    "http://localhost:5173", 
-    "https://ebaub-fun-hub.vercel.app", 
-  ],
+  origin: ["https://ebaub-backend.vercel.app", "http://localhost:5173"], 
   credentials: true
 }));
 
@@ -354,36 +396,18 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB Connected Successfully!"))
   .catch(err => console.error("❌ MongoDB Connection Error:", err));
 
-// Routes
+// Routes Import
 const userRoutes = require('./routes/userRoutes');
 const postRoutes = require('./routes/postRoutes');
 
-// Use Routes (Note: Path গুলো একটু চেঞ্জ হয়েছে যাতে ক্লিন থাকে, কিন্তু আমি ফ্রন্টএন্ডেও বলে দিচ্ছি কোথায় চেঞ্জ করতে হবে)
-// তবে আপনার আগের কোড যাতে ভাঙে না, তাই আমি পাথ গুলো আগের মতোই রাখছি রাউটার ফাইলের ভিতরে।
-// এখানে আমরা মেইন পাথ সেট করবো।
-
-app.use('/api', userRoutes); // NOTE: userRoutes এর ভিতরেই /register, /users আছে।
-// একটু ফিক্স করি যাতে আপনার ফ্রন্টএন্ডের সাথে মিলে:
-// userRoutes এর ভিতরে '/register' আছে, তাই এখানে '/api' দিলে url হবে /api/register (Perfect)
-// কিন্তু '/users' এর জন্য userRoutes এ '/' আছে। তাহলে /api/users পাওয়ার জন্য...
-// নিচের কনফিগটা দেখুন:
-
-app.use('/api', require('./routes/userRoutes')); // এটাতে একটু কনফিউশন হতে পারে। সহজ করি:
-
-// Manual mounting to match existing frontend EXACTLY:
-app.post('/api/register', require('./controllers/userController').registerUser);
-app.get('/api/users/:email', require('./controllers/userController').getUserByEmail);
-app.get('/api/users', require('./controllers/userController').getAllUsers);
-app.put('/api/users/role', require('./controllers/userController').updateUserStatusRole); // Used for both role & status now
-app.put('/api/users/update', require('./controllers/userController').updateProfile);
-app.put('/api/users/suspend', require('./controllers/userController').suspendUser);
-app.delete('/api/users/:id', require('./controllers/userController').deleteUser);
-
-// Post Routes Mounting
-app.use('/api/posts', postRoutes); 
+// 🔥 ROUTE MOUNTING (খুবই গুরুত্বপূর্ণ)
+// আমরা '/api' প্রিফিক্স ব্যবহার করছি।
+// userRoutes ফাইলের ভিতরেই আমরা '/users' এবং '/register' ডিফাইন করব।
+app.use('/api', userRoutes); 
+app.use('/api/posts', postRoutes);
 
 app.get('/', (req, res) => {
-  res.send('EBAUB Fun Hub Server is Running 🚀');
+  res.send('EBAUB Fun Hub Server Running 🚀');
 });
 
 app.listen(port, () => {
