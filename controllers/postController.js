@@ -152,35 +152,56 @@ exports.deleteComment = async (req, res) => { /* ... existing code ... */
         res.status(500).json({ error: err.message });
       }
 };
-// 🔥 Update Comment Function
+exports.updatePostContent = async (req, res) => { /* ... existing code ... */ 
+    try {
+        const { content } = req.body;
+        const updatedPost = await Post.findByIdAndUpdate(req.params.id, { content }, { new: true })
+          .populate('user', 'name photoURL')
+          .populate('comments.user', 'name photoURL');
+        res.json(updatedPost);
+      } catch (err) {
+        res.status(500).json({ error: err.message });
+      }
+};
+
+// ... আপনার ফাইলের ওপরের সব কোড ঠিক থাকবে ...
+
+// 🔥 এই ফাংশনটি ফাইলের একদম শেষে যুক্ত করুন
 exports.updateComment = async (req, res) => {
   try {
     const { postId, commentId } = req.params;
     const { userId, text } = req.body;
 
+    // ১. পোস্ট খুঁজে বের করা
     const post = await Post.findById(postId);
-    if (!post) return res.status(404).json({ message: "Post not found" });
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
 
+    // ২. কমেন্ট খুঁজে বের করা
     const comment = post.comments.id(commentId);
-    if (!comment) return res.status(404).json({ message: "Comment not found" });
+    if (!comment) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
 
-    // চেক করা হচ্ছে যে ইউজার তার নিজের কমেন্ট এডিট করছে কিনা
+    // ৩. চেক করা: যে এডিট করছে সে-ই কমেন্টের মালিক কিনা
     if (comment.user.toString() !== userId) {
       return res.status(403).json({ message: "Unauthorized: You can only edit your own comment" });
     }
 
-    // কমেন্ট আপডেট
+    // ৪. কমেন্ট আপডেট এবং সেভ করা
     comment.text = text;
     await post.save();
 
-    // আপডেটেড পোস্ট রিটার্ন করা (যাতে ফ্রন্টএন্ডে সাথে সাথে দেখায়)
+    // ৫. আপডেটেড ডাটা পপুলেট করে ফ্রন্টএন্ডে পাঠানো
     const updatedPost = await Post.findById(postId)
-      .populate('user', 'name photoURL')
+      .populate('user', 'name photoURL varsityId email')
       .populate('comments.user', 'name photoURL');
 
     res.json(updatedPost);
 
   } catch (err) {
+    console.error("Update Comment Error:", err);
     res.status(500).json({ error: err.message });
   }
 };
