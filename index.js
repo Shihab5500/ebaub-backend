@@ -387,7 +387,7 @@ const port = process.env.PORT || 5000;
 // Middleware
 app.use(express.json());
 app.use(cors({
-  origin: ["https://ebaub-backend.vercel.app", "http://localhost:5173"], 
+  origin: ["http://localhost:5173", "https://ebaub-fun-hub.vercel.app"], 
   credentials: true
 }));
 
